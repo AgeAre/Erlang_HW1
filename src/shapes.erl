@@ -9,30 +9,7 @@
 -module(shapes).
 -author("ageare").
 
-%% API
-%%-export([print_hellowWorld/0]).
-%%print_hellowWorld()->
-%%  io:format("Hello World ~n").
-
-%%-export([area/1]).
-%%
-%%area({rectangle, Width, Height})->
-%%  Width * Height;
-%%
-%%area({sqaure, Edge})->
-%%  Edge * Edge;
-%%
-%%area({circle, R})->
-%%  math:pi() * R * R;
-%%
-%%area({a, B})->
-%%  add1(B).
-%%
-%%
-%%add1(A)->A+1.
-
 -export([shapesArea/1,squaresArea/1,triangleArea/1,shapesFilter1/1, shapesFilter2/1]).
-
 
 shapesFilter1(rectangle)->
   fun rectangleFilter/1;
@@ -43,20 +20,8 @@ shapesFilter1(triangle)->
 shapesFilter1(ellipse)->
   fun ellipseFilter/1.
 
-
-
-
-
-
-
-
-
-%%rectangleFilter(Tuple) ->
-%%  T = [X || X <- Tuple, {rectangle,_}].
-%%  H = shapes.x
-%%  H | T.
-
 rectangleFilter(Tuple) ->
+  isShapesStruct(Tuple),
   {shapes,L} = Tuple,
   L1 = [{rectangle,X} || {X1,X}<-L, X1 == rectangle],
   {shapes,L1}.
@@ -71,15 +36,14 @@ ellipseFilter(Tuple) ->
   L1 = [{ellipse,X} || {X1,X}<-L, X1 == ellipse],
   {shapes,L1}.
 
-
-
 shapesFilter2(X)->
   case X of
     square ->
       fun squareFilter/1;
     circle ->
       fun circleFilter/1;
-    B when B =:= 'triangle'; B =:= 'ellipse'; B =:= 'rectangle' -> shapesFilter1(B)
+    B when B =:= 'triangle'; B =:= 'ellipse'; B =:= 'rectangle' ->
+      shapesFilter1(B)
   end.
 
 
@@ -138,4 +102,15 @@ calcEllipseArea([]) -> 0;
 calcEllipseArea([H|L]) ->
   {ellipse,{radius, Radius1, Radius2}} = H,
   Radius1 * Radius2 * math:pi() + calcEllipseArea(L).
+
+
+
+isShapesStruct({X,Y}) when X =:= shapes, Y =/= []->
+  isValidShape(Y);
+isShapesStruct(_) -> false.
+
+isValidShape([]) -> true;
+isValidShape([{Shape,{Scale,X,Y}}|T]) when ((Shape =:= rectangle) or (Shape =:= triangle) or (Shape =:= ellipse)),
+  ((Scale =:= dim) or (Scale =:= radius)), X > 0, Y > 0-> isValidShape(T);
+isValidShape(_) -> false.
 

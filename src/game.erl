@@ -16,7 +16,7 @@
 %canWin(0) -> false;
 canWin(1) -> true;
 canWin(2) -> true;
-canWin(N) when N > 0 ->
+canWin(N) when (N > 0), (is_integer(N)) ->
   not canWin(N - 1) or not canWin(N - 2).
 
 
@@ -24,7 +24,7 @@ canWin(N) when N > 0 ->
 nextMove(1) -> {true, 1};
 nextMove(2) -> {true, 2};
 nextMove(3) -> false;
-nextMove(N) when N > 0 ->
+nextMove(N) when (N > 0), (is_integer(N))->
   case (not canWin(N - 1)) of
     true -> {true, 1};
     false ->
@@ -36,4 +36,4 @@ nextMove(N) when N > 0 ->
 .
 
 explanation() ->
-  io:format("expecting").
+  io:format("Answer!!!!!!!!!!!!!!!!!!!").

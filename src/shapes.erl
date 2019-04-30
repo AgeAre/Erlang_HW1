@@ -21,17 +21,17 @@ shapesFilter(Shape) when ((Shape =:= rectangle) or (Shape =:= triangle) or (Shap
       fun ellipseFilter/1
   end.
 
-rectangleFilter({Shapes, L}) when Shapes =:= shapes, is_list(L) ->
+rectangleFilter({shapes, L}) when is_list(L) ->
   isShapesStruct(L),
   L1 = [{rectangle,X} || {X1,X}<-L, X1 == rectangle],
   {shapes,L1}.
 
-triangleFilter({Shapes, L}) when Shapes =:= shapes, is_list(L) ->
+triangleFilter({shapes, L}) when is_list(L) ->
   isShapesStruct(L),
   L1 = [{triangle,X} || {X1,X}<-L, X1 == triangle],
   {shapes,L1}.
 
-ellipseFilter({Shapes, L}) when Shapes =:= shapes, is_list(L) ->
+ellipseFilter({shapes, L}) when is_list(L) ->
   isShapesStruct(L),
   L1 = [{ellipse,X} || {X1,X}<-L, X1 == ellipse],
   {shapes,L1}.
@@ -50,90 +50,69 @@ shapesFilter2(Shape) when ((Shape =:= rectangle) or (Shape =:= triangle) or
   end.
 
 
-squareFilter({Shapes, L}) when Shapes =:= shapes, is_list(L) ->
-  Res = isShapesStruct(L),
-  case Res of
-    true ->
-    {_,Rectangles} = (shapesFilter(rectangle))({Shapes, L}),
-    L1 = [{rectangle,{dim, X, X}} || {rectangle,{dim,X, X}} <- Rectangles],
-    {shapes,L1}
-  end.
+squareFilter({shapes, L}) when is_list(L) ->
+  isShapesStruct(L),
+  {_,Rectangles} = (shapesFilter(rectangle))({shapes, L}),
+  L1 = [{rectangle,{dim, X, X}} || {rectangle,{dim,X, X}} <- Rectangles],
+  {shapes,L1}.
 
-circleFilter({Shapes, L}) when Shapes =:= shapes, is_list(L) ->
-  Res = isShapesStruct(L),
-  case Res of
-    true ->
-    {_,Ellipses} = (shapesFilter(ellipse))({Shapes, L}),
-    L1 = [{ellipse,{radius, X, X}} || {ellipse,{radius,X, X}}<-Ellipses],
-    {shapes,L1}
-  end.
+circleFilter({shapes, L}) when is_list(L) ->
+  isShapesStruct(L),
+  {_,Ellipses} = (shapesFilter(ellipse))({shapes, L}),
+  L1 = [{ellipse,{radius, X, X}} || {ellipse,{radius,X, X}}<-Ellipses],
+  {shapes,L1}.
 
 
-shapesArea({Shapes, L}) when Shapes =:= shapes, is_list(L) ->
-  Res = isShapesStruct(L),
-  case Res of
-    true ->
-    ellipseArea({Shapes, L}) + rectangleArea({Shapes, L}) + trianglesArea({Shapes, L})
-  end.
+shapesArea({shapes, L}) when is_list(L) ->
+  isShapesStruct(L),
+  ellipseArea({shapes, L}) + rectangleArea({shapes, L}) + trianglesArea({shapes, L}).
 
 
-rectangleArea({Shapes, L}) when Shapes =:= shapes, is_list(L) ->
-  Res = isShapesStruct(L),
-  case Res of
-    true ->
-    {shapes, Rectangles} = (shapes:shapesFilter2(rectangle))({Shapes, L}),
-    calcRectangleArea(Rectangles)
-  end.
 
-squaresArea({Shapes, L})  when Shapes =:= shapes, is_list(L) ->
-  Res = isShapesStruct(L),
-  case Res of
-    true ->
-    {shapes, Squares} = (shapes:shapesFilter2(square))({Shapes, L}),
-    calcRectangleArea(Squares)
-  end.
+rectangleArea({shapes, L}) when is_list(L) ->
+  isShapesStruct(L),
+  {shapes, Rectangles} = (shapes:shapesFilter2(rectangle))({shapes, L}),
+  calcRectangleArea(Rectangles).
+
+squaresArea({shapes, L})  when is_list(L) ->
+  isShapesStruct(L),
+  {shapes, Squares} = (shapes:shapesFilter2(square))({shapes, L}),
+  calcRectangleArea(Squares).
 
 calcRectangleArea([]) -> 0;
-
 calcRectangleArea([H|L]) ->
   {rectangle,{dim, Height, Width}} = H,
   Height * Width + calcRectangleArea(L).
 
 
-trianglesArea({Shapes, L})  when Shapes =:= shapes, is_list(L) ->
-  Res = isShapesStruct(L),
-  case Res of
-    true ->
-      {shapes, Triangles} = (shapes:shapesFilter2(triangle))({Shapes, L}),
-      calcTriangleArea(Triangles)
-  end.
+trianglesArea({shapes, L})  when is_list(L) ->
+  isShapesStruct(L),
+  {shapes, Triangles} = (shapes:shapesFilter2(triangle))({shapes, L}),
+  calcTriangleArea(Triangles).
 
 calcTriangleArea([]) -> 0;
-
 calcTriangleArea([H|L]) ->
   {triangle,{dim, Base, Height}} = H,
   Height * Base / 2 + calcTriangleArea(L).
 
 
-ellipseArea({Shapes, L}) when Shapes =:= shapes, is_list(L) ->
-  Res = isShapesStruct(L),
-  case Res of
-    true ->
-    {shapes, Ellipses} = (shapes:shapesFilter2(ellipse))({Shapes, L}),
-    calcEllipseArea(Ellipses)
-  end.
+ellipseArea({shapes, L}) when is_list(L) ->
+  isShapesStruct(L),
+  {shapes, Ellipses} = (shapes:shapesFilter2(ellipse))({shapes, L}),
+  calcEllipseArea(Ellipses).
 
 calcEllipseArea([]) -> 0;
-
 calcEllipseArea([H|L]) ->
   {ellipse,{radius, Radius1, Radius2}} = H,
   Radius1 * Radius2 * math:pi() + calcEllipseArea(L).
 
 
-% TODO there is a bug in here. {rectangle,{radius,1,1}}
 isShapesStruct([]) -> true;
-isShapesStruct([{Shape,{Scale,X,Y}}|T]) when ((Shape =:= rectangle) or (Shape =:= triangle) or (Shape =:= ellipse)),
-  ((Scale =:= dim) or (Scale =:= radius)), X > 0, Y > 0 -> isShapesStruct(T).
+isShapesStruct([{Shape,{Scale,X,Y}}|T]) when
+    (((Shape =:= rectangle) and (Scale =:= dim))
+  or ((Shape =:= triangle)  and (Scale =:= dim))
+  or ((Shape =:= ellipse)   and (Scale =:= radius))),
+      X > 0, Y > 0 -> isShapesStruct(T).
 
 
 

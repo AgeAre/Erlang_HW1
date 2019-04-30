@@ -9,9 +9,9 @@
 -module(shapes).
 -author("ageare").
 
--export([shapesArea/1,squaresArea/1,triangleArea/1,shapesFilter1/1, shapesFilter2/1]).
+-export([shapesArea/1,squaresArea/1, trianglesArea/1, shapesFilter/1, shapesFilter2/1]).
 
-shapesFilter1(Shape) when ((Shape =:= rectangle) or (Shape =:= triangle) or (Shape =:= ellipse)) ->
+shapesFilter(Shape) when ((Shape =:= rectangle) or (Shape =:= triangle) or (Shape =:= ellipse)) ->
   case Shape of
     rectangle ->
       fun rectangleFilter/1;
@@ -46,24 +46,24 @@ shapesFilter2(Shape) when ((Shape =:= rectangle) or (Shape =:= triangle) or
     circle ->
       fun circleFilter/1;
     B when B =:= 'triangle'; B =:= 'ellipse'; B =:= 'rectangle' ->
-      shapesFilter1(B)
+      shapesFilter(B)
   end.
 
 
 squareFilter({Shapes, L}) when Shapes =:= shapes, is_list(L) ->
   Res = isShapesStruct(L),
-  if
-    Res == true ->
-    {_,Rectangles} = (shapesFilter1(rectangle))({Shapes, L}),
+  case Res of
+    true ->
+    {_,Rectangles} = (shapesFilter(rectangle))({Shapes, L}),
     L1 = [{rectangle,{dim, X, X}} || {rectangle,{dim,X, X}} <- Rectangles],
     {shapes,L1}
   end.
 
 circleFilter({Shapes, L}) when Shapes =:= shapes, is_list(L) ->
   Res = isShapesStruct(L),
-  if
-    Res == true ->
-    {_,Ellipses} = (shapesFilter1(ellipse))({Shapes, L}),
+  case Res of
+    true ->
+    {_,Ellipses} = (shapesFilter(ellipse))({Shapes, L}),
     L1 = [{ellipse,{radius, X, X}} || {ellipse,{radius,X, X}}<-Ellipses],
     {shapes,L1}
   end.
@@ -71,24 +71,24 @@ circleFilter({Shapes, L}) when Shapes =:= shapes, is_list(L) ->
 
 shapesArea({Shapes, L}) when Shapes =:= shapes, is_list(L) ->
   Res = isShapesStruct(L),
-  if
-    Res == true ->
-    ellipseArea({Shapes, L}) + rectangleArea({Shapes, L}) + triangleArea({Shapes, L})
+  case Res of
+    true ->
+    ellipseArea({Shapes, L}) + rectangleArea({Shapes, L}) + trianglesArea({Shapes, L})
   end.
 
 
 rectangleArea({Shapes, L}) when Shapes =:= shapes, is_list(L) ->
   Res = isShapesStruct(L),
-  if
-    Res == true ->
+  case Res of
+    true ->
     {shapes, Rectangles} = (shapes:shapesFilter2(rectangle))({Shapes, L}),
     calcRectangleArea(Rectangles)
   end.
 
 squaresArea({Shapes, L})  when Shapes =:= shapes, is_list(L) ->
   Res = isShapesStruct(L),
-  if
-    Res == true ->
+  case Res of
+    true ->
     {shapes, Squares} = (shapes:shapesFilter2(square))({Shapes, L}),
     calcRectangleArea(Squares)
   end.
@@ -100,10 +100,10 @@ calcRectangleArea([H|L]) ->
   Height * Width + calcRectangleArea(L).
 
 
-triangleArea({Shapes, L})  when Shapes =:= shapes, is_list(L) ->
+trianglesArea({Shapes, L})  when Shapes =:= shapes, is_list(L) ->
   Res = isShapesStruct(L),
-  if
-    Res == true ->
+  case Res of
+    true ->
       {shapes, Triangles} = (shapes:shapesFilter2(triangle))({Shapes, L}),
       calcTriangleArea(Triangles)
   end.
@@ -117,8 +117,8 @@ calcTriangleArea([H|L]) ->
 
 ellipseArea({Shapes, L}) when Shapes =:= shapes, is_list(L) ->
   Res = isShapesStruct(L),
-  if
-    Res == true ->
+  case Res of
+    true ->
     {shapes, Ellipses} = (shapes:shapesFilter2(ellipse))({Shapes, L}),
     calcEllipseArea(Ellipses)
   end.
@@ -130,11 +130,10 @@ calcEllipseArea([H|L]) ->
   Radius1 * Radius2 * math:pi() + calcEllipseArea(L).
 
 
-
+% TODO there is a bug in here. {rectangle,{radius,1,1}}
 isShapesStruct([]) -> true;
 isShapesStruct([{Shape,{Scale,X,Y}}|T]) when ((Shape =:= rectangle) or (Shape =:= triangle) or (Shape =:= ellipse)),
-  ((Scale =:= dim) or (Scale =:= radius)), X > 0, Y > 0 -> isShapesStruct(T);
-isShapesStruct(_) -> false.
+  ((Scale =:= dim) or (Scale =:= radius)), X > 0, Y > 0 -> isShapesStruct(T).
 
 
 
